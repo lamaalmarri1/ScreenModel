@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Traffic Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+    
+        body, html {
+          height: 100%;
+        }
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-family: Arial, sans-serif;
+          position: relative;
+          background-color: rgb(15, 15, 34);
+        }
+        body::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: url("https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzZ6NzR4amljaXc4Ym9vYjZmN3VxbHFqeDRjYjU2c3VvNXdzcHNmMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UYBDCJjwOd9Re/giphy.gif") no-repeat;
+          background-size: cover;
+          background-position: center;
+          opacity: 0.3;
+          z-index: -1; 
+        }
+    
+        .card {
+          background-color: rgba(142, 142, 142, 0.715);
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          max-width: 1000px;
+          padding-top: 20px;
+          padding-bottom: 20px;
+          margin-top: 180px;
+          margin-bottom: 160px;
+          width: 100%;
+          text-align: center;
+          z-index: 1;
+        }
+    
+        video {
+            width:400px;
+            height:400px;
+          align-items: center;
+        }
+    
+        h2 {
+          margin-bottom: 15px;
+          color: #ffffff;
+          text-transform: uppercase;
+        }
+    .btn{
+        margin-top: 20PX;
+        padding:15px;
+        margin-left: 180px;
+        margin-right: 180px;
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 300px;
+        background-color: rgb(12, 12, 69);
+        border-radius: 40px;
+    
+    }
+    .btn:hover{
+        background-color: rgb(197, 197, 197);
+        color: black;
+        transition: all 0.5s;
+    }
+    #traffic-status {
+                font-weight: bold;
+                margin-left: 10px;
+                animation: pulse 1.5s infinite;
+            }
+    
+            /* Pulse animation for traffic status */
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+    
+            /* Loader animation */
+            .loader {
+                display: none;
+                margin: 20px auto;
+                border: 6px solid #f3f3f3;
+                border-top: 6px solid #3498db;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+            }
+    
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+    
+            /* <html>
+    
+    </html> */
+            /* Responsiveness */
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 2rem;
+                }
+    
+    .card {
+        width: 95%;
+        padding: 15px;
+    }
+    
+    .status {
+        font-size: 1.2rem;
+        padding: 10px;
+    }
+    }
+       
+
+        h1 {
+            color: #fff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        /* Live feed styling */
+        #live-feed {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .status {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            color: #ffeb3b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #traffic-status {
+            font-weight: bold;
+            margin-left: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Pulse animation for traffic status */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Loader animation */
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                width: 95%;
+                padding: 15px;
+            }
+
+            .status {
+                font-size: 1.2rem;
+                padding: 10px;
+            }
+        }
+    </style>
+    <script>
+        // Function to periodically update the traffic status
+        function updateTrafficStatus() {
+            fetch('/traffic_status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('traffic-status').innerText = data.status;
+                })
+                .catch(error => console.error('Error fetching traffic status:', error));
+        }
+
+        // Set interval to update traffic status every 2 seconds
+        setInterval(updateTrafficStatus, 2000);
+    </script>
+</head>
+<body>
+    <div class="card">
+        <h1>Live Traffic Detection</h1>
+
+        <!-- Video Element for Live Detection -->
+        <img id="live-feed" src="{{ url_for('video_feed') }}" alt="Live Traffic Feed">
+
+        <!-- Traffic status display -->
+        <div class="status">
+            <h2>Current Traffic Status: <span id="traffic-status">{{ traffic_status }}</span></h2>
+        </div>
+    </div>
+</body>
+</html>
